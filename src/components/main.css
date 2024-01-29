@@ -1,0 +1,36 @@
+.game-label{
+    font-size: small;
+    border: 1px solid green;
+    padding: 3px 10px;
+    border-radius: 5px;
+    background-color: rgba(163, 217, 163, 0.836);
+}
+
+.lable-container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+}
+
+.description{
+    font-size: 10px;
+}
+
+.description-modal{
+    font-size: 15px;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.dark-border {
+    border: 2px solid #919191;
+}
+
+.accordion-button:not(.collapsed)::after {
+    content: none;
+}
+
+.error{
+    padding: 10px;
+    width: 100%;
+}
