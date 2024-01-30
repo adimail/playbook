@@ -1,5 +1,5 @@
 .App-header {
-  background-color: #282c34;
+  background-color: #131322;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -19,4 +19,186 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+}
+
+button {
+  width: 50%;
+  align-self: center;
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #1776db;
+  border-radius: 20px;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.15s ease-in;
+}
+  
+button:hover {
+  background-color: #0056b3;
+  border-radius: 5px;
+}
+
+.container{
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  width: 100%;
+  align-items: center;
+  font-size:large;
+}
+
+.tweet{
+  transform: scale(0.5);
+  text-align: left;
+  font-size: small;
+}
+
+.button{
+  width: fit-content;
+  border-radius: 20px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.button:hover{
+  transform: scale(1.05);
+}
+
+.game-label{
+  font-size: small;
+  border: 1px solid green;
+  padding: 3px 10px;
+  border-radius: 5px;
+  background-color: #215021d6;
+}
+
+.modal-game-label{
+  font-size: small;
+  border: 1px solid rgb(0, 0, 0);
+  padding: 3px 10px;
+  border-radius: 5px;
+  background-color: #5e748e;
+  color: #000;
+}
+
+.lable-container {
+  display: flex;
+  gap: 10px;
+}
+
+.description{
+  font-size: 10px;
+}
+
+.description-modal{
+  font-size: 15px;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.dark-border {
+  border: 2px solid #919191;
+}
+
+.accordion-button:not(.collapsed)::after {
+  content: none;
+}
+
+.error{
+  padding: 10px;
+  width: 100%;
+}
+
+.game{
+  text-align: left;
+}
+
+.modal-header  {
+  color: black; 
+  background-color: #5e748e;
+  border-color: #5e748e;
+}
+
+.modal-body  {
+  color: black; 
+  background-color: #d8d8d8;
+  border-color: #5e748e;
+}
+
+.sidebar{
+  width: 0px;
+}
+
+.userimage{
+  width: 50px;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.username {
+  font-size: small;
+}
+
+.pagebuttons{
+  max-width: 200px;
+}
+
+/*  */
+
+.message {
+  display: flex;
+  align-items: center;
+
+}
+
+
+.sent {
+  flex-direction: row-reverse;
+}
+
+.sent p {
+  color: white;
+  background: #0b93f6;
+  align-self: flex-end;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+.received p {
+  background: #9393ff;
+  color: black;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.message span{
+  font-size: 10px;
+}
+
+.message div{
+  display: flex;
+  flex-direction: column;
+}
+
+.message p{
+  margin: 0;
+}
+
+.message img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin: 2px 5px;
+}
+
+.footer {
+  padding: 5px 100px;
+  border-radius: 3px;
+  margin: 10px;
+  background: radial-gradient(circle, #131417, transparent);
+  font-size: x-small;
 }
