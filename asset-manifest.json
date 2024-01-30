@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/playbook/static/css/main.ef3c6e2c.css",
+    "main.js": "/playbook/static/js/main.af2c9675.js",
+    "static/js/787.3c4130c8.chunk.js": "/playbook/static/js/787.3c4130c8.chunk.js",
+    "index.html": "/playbook/index.html",
+    "main.ef3c6e2c.css.map": "/playbook/static/css/main.ef3c6e2c.css.map",
+    "main.af2c9675.js.map": "/playbook/static/js/main.af2c9675.js.map",
+    "787.3c4130c8.chunk.js.map": "/playbook/static/js/787.3c4130c8.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ef3c6e2c.css",
+    "static/js/main.af2c9675.js"
+  ]
+}
