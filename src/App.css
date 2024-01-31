@@ -1,23 +1,10 @@
 .App-header {
-  background-color: #131322;
+  background-color: #292c32;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
   color: white;
 }
 
@@ -36,7 +23,6 @@ button {
 }
   
 button:hover {
-  background-color: #0056b3;
   border-radius: 5px;
 }
 
@@ -49,8 +35,14 @@ button:hover {
   font-size:large;
 }
 
+
 .tweet{
-  transform: scale(0.5);
+  transform: scale(0.7);
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: left;
   font-size: small;
 }
@@ -82,7 +74,7 @@ button:hover {
   border: 1px solid rgb(0, 0, 0);
   padding: 3px 10px;
   border-radius: 5px;
-  background-color: #5e748e;
+  background-color: #d4b2d2;
   color: #000;
 }
 
@@ -134,14 +126,23 @@ button:hover {
   width: 0px;
 }
 
-.userimage{
-  width: 50px;
-  padding: 10px;
+.userimage img{
+  height: 40px;
+  width: 40px;
   border-radius: 50%;
 }
 
-.username {
-  font-size: small;
+
+.userimage{
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: right;
+  top: 0;
+  right: 0;
+  width: fit-content;
+  height: fit-content;
+  padding: 10px;
 }
 
 .pagebuttons{
@@ -196,9 +197,15 @@ button:hover {
 }
 
 .footer {
+  position: fixed;
+  bottom: 0;
   padding: 5px 100px;
   border-radius: 3px;
   margin: 10px;
   background: radial-gradient(circle, #131417, transparent);
   font-size: x-small;
+}
+
+.footer a{
+  text-decoration: none;
 }
