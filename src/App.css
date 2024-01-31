@@ -197,6 +197,10 @@ button:hover {
 }
 
 .footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 500px;
   position: fixed;
   bottom: 0;
   padding: 5px 100px;
@@ -208,4 +212,12 @@ button:hover {
 
 .footer a{
   text-decoration: none;
+}
+
+.git-icon {
+  color: #fff;
+  position: fixed;
+  padding: 10px;
+  bottom: 0;
+  right: 0;
 }
