@@ -73,27 +73,26 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
 
   const getMessages = () => {
     try {
-      const unsubscribe = onSnapshot(
-        query(messageRef, orderBy("createdAt", "asc"), limit(25)),
-        (querySnapshot) => {
-          const filteredData = querySnapshot.docs.map((doc) => ({
-            ...doc.data(),
-            id: doc.id,
-          }));
-          setMessages(filteredData);
-        },
-      );
-
-      return () => unsubscribe();
+      const q = query(messageRef, orderBy("createdAt", "asc"), limit(25));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const filteredData = snapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        setMessages(filteredData);
+      });
+  
+      return unsubscribe;
     } catch (err) {
       console.error(err);
     }
   };
-
+  
   useEffect(() => {
     const unsubscribe = getMessages();
     return () => unsubscribe();
   }, []);
+  
 
   const handleSendMessage = async () => {
     try {
@@ -124,9 +123,9 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
     >
       <Modal.Header className="d-flex flex-column" closeButton>
         <Modal.Title>Discussion Panel</Modal.Title>
-        Follow community guidlines and be nice.
+        Follow community guidelines and be nice.
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body style={{ maxHeight: "68vh", overflowY: "auto" }}>
         <div className="discussion-panel d-flex flex-column gap-3">
           {messages &&
             messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
@@ -175,7 +174,6 @@ const Login = () => {
         <button className="button" onClick={signInWithGoogle}>
           Continue with Google <FaGoogle />
         </button>
-        Be nice 🤗
       </div>
       <div className="tweet">
         <span>Idea:</span>
@@ -371,8 +369,6 @@ const MainComponent = () => {
   );
 };
 
-// ... (your other imports)
-
 const GameModal = ({
   setSelectedGame,
   selectedGame,
@@ -440,11 +436,6 @@ const GameModal = ({
     setShowDiscussionModal(true);
   };
 
-  const handleCloseDiscussion = () => {
-    setDiscussionOpen(false);
-    setShowDiscussionModal(false);
-  };
-
   return (
     <Modal
       show={selectedGame !== null}
@@ -455,17 +446,30 @@ const GameModal = ({
       size="xl"
     >
       <Modal.Header closeButton>
-        <Modal.Title>{discussionOpen ? `${selectedGame?.name} Discussion` : selectedGame?.name}</Modal.Title>
+        <Modal.Title>
+          {discussionOpen
+            ? `${selectedGame?.name} Discussion`
+            : selectedGame?.name}
+        </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body style={{ maxHeight: "68vh", overflowY: "auto" }}>
         {discussionOpen ? (
-          <div className="discussion-panel d-flex flex-column gap-3">
-            {gameMessages.map((msg) => (
-              <ChatMessage key={msg.id} message={msg} />
-            ))}
-          </div>
+          <>
+            {gameMessages.length > 0 ? (
+              <div className="discussion-panel d-flex flex-column gap-3">
+                {gameMessages.map((msg) => (
+                  <ChatMessage key={msg.id} message={msg} />
+                ))}
+              </div>
+            ) : (
+              <div className="err-msg d-flex flex-column align-items-center">
+                <h3>No messages yet.</h3> Start a discussion!
+              </div>
+            )}
+          </>
         ) : (
-          selectedGame && selectedGame.description && (
+          selectedGame &&
+          selectedGame.description && (
             <div style={{ fontSize: "small" }}>
               <p className="description-modal">{selectedGame.description}</p>
               <hr />
@@ -477,6 +481,15 @@ const GameModal = ({
               </ul>
             </div>
           )
+        )}
+        {!discussionOpen && (
+          <Button
+            variant="primary"
+            onClick={handleOpenDiscussion}
+            style={{ width: "fit-content", padding: "3px 10px" }}
+          >
+            Open Discussion
+          </Button>
         )}
       </Modal.Body>
       <Modal.Footer
@@ -503,13 +516,7 @@ const GameModal = ({
             Edit Game
           </Button>
         )}
-        <Button
-          variant="primary"
-          onClick={discussionOpen ? handleCloseDiscussion : handleOpenDiscussion}
-          style={{ width: "fit-content", padding: "3px 10px" }}
-        >
-          {discussionOpen ? 'Close Discussion' : 'Open Discussion'}
-        </Button>
+
         {discussionOpen && (
           <div className="d-flex justify-content-between w-100">
             <input
@@ -538,9 +545,6 @@ const GameModal = ({
     </Modal>
   );
 };
-
-// ... (rest of the code)
-
 
 const AddGameModal = ({ addingNewGame, setAddingNewGame, selectedGame }) => {
   const [gameName, setGameName] = useState(
