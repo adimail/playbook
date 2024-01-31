@@ -203,9 +203,8 @@ button:hover {
   width: 500px;
   position: fixed;
   bottom: 0;
-  padding: 5px 100px;
+  padding: 5px 50px;
   border-radius: 3px;
-  margin: 10px;
   background: radial-gradient(circle, #131417, transparent);
   font-size: x-small;
 }

@@ -142,7 +142,7 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
             style={{ marginRight: "8px" }}
           />
           <button
-          className="btn btn-sm btn-primary"
+            className="btn btn-sm btn-primary"
             variant="primary"
             onClick={handleSendMessage}
             style={{ width: "max-content" }}
@@ -200,6 +200,7 @@ const MainComponent = () => {
   const [selectedGame, setSelectedGame] = useState(null);
   const [addingNewGame, setAddingNewGame] = useState(false);
   const [showDiscussionPanel, setShowDiscussionPanel] = useState(false);
+  const [showDiscussionModal, setShowDiscussionModal] = useState(false);
 
   const toggleDiscussionPanel = () =>
     setShowDiscussionPanel(!showDiscussionPanel);
@@ -246,7 +247,10 @@ const MainComponent = () => {
             {user && <img src={user.photoURL} alt="Profile" />}
           </OverlayTrigger>
           <div className="git-icon">
-            <a style={{color:"white"}} href="https://github.com/adimail/playbook">
+            <a
+              style={{ color: "white" }}
+              href="https://github.com/adimail/playbook"
+            >
               <FaGithub />
             </a>
           </div>
@@ -341,11 +345,15 @@ const MainComponent = () => {
           <GameModal
             setSelectedGame={setSelectedGame}
             selectedGame={selectedGame}
+            user={user}
+            showDiscussionModal={showDiscussionModal}
+            setShowDiscussionModal={setShowDiscussionModal}
           />
 
           <AddGameModal
             addingNewGame={addingNewGame}
             setAddingNewGame={setAddingNewGame}
+            user={user}
           />
 
           <DiscussionPanel
@@ -363,17 +371,78 @@ const MainComponent = () => {
   );
 };
 
-const GameModal = ({ setSelectedGame, selectedGame }) => {
+const GameModal = ({
+  setSelectedGame,
+  selectedGame,
+  setShowDiscussionModal,
+  user,
+}) => {
   const [editing, setEditing] = useState(false);
+
+  const [discussionMessage, setDiscussionMessage] = useState("");
+  const [gameMessages, setGameMessages] = useState([]);
+  const discussionRef = collection(db, `discussion-${selectedGame?.id}`);
+
+  const handleSendGameMessage = async () => {
+    try {
+      if (discussionMessage.trim() === "") {
+        return;
+      }
+      const newMessage = {
+        createdAt: new Date(),
+        photoURL: user.photoURL,
+        text: discussionMessage,
+        uid: user.uid,
+      };
+
+      await addDoc(discussionRef, newMessage);
+
+      setDiscussionMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  const getGameMessages = () => {
+    try {
+      const unsubscribe = onSnapshot(
+        query(discussionRef, orderBy("createdAt", "asc"), limit(25)),
+        (querySnapshot) => {
+          const filteredData = querySnapshot.docs.map((doc) => ({
+            ...doc.data(),
+            id: doc.id,
+          }));
+          setGameMessages(filteredData);
+        },
+      );
+
+      return () => unsubscribe();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedGame !== null && selectedGame) {
+      const unsubscribe = getGameMessages();
+      return () => unsubscribe();
+    }
+  }, [selectedGame !== null, selectedGame]);
 
   const handleEdit = () => {
     setEditing(true);
   };
 
+  const handleOpenDiscussion = () => {
+    setShowDiscussionModal(true);
+  };
+
   return (
     <Modal
       show={selectedGame !== null}
-      onHide={() => setSelectedGame(null)}
+      onHide={() => {
+        setSelectedGame(null);
+      }}
       size="xl"
     >
       <Modal.Header closeButton>
@@ -392,6 +461,11 @@ const GameModal = ({ setSelectedGame, selectedGame }) => {
             </ul>
           </div>
         )}
+        <div className="discussion-panel d-flex flex-column gap-3">
+          {gameMessages.map((msg) => (
+            <ChatMessage key={msg.id} message={msg} />
+          ))}
+        </div>
       </Modal.Body>
       <Modal.Footer
         className="d-flex gap-3"
@@ -413,6 +487,29 @@ const GameModal = ({ setSelectedGame, selectedGame }) => {
         >
           Edit Game
         </Button>
+        <Button
+          variant="primary"
+          onClick={handleOpenDiscussion}
+          style={{ width: "fit-content", padding: "3px 10px" }}
+        >
+          Open Discussion
+        </Button>
+        <div className="d-flex justify-content-between w-100">
+          <input
+            value={discussionMessage}
+            onChange={(e) => setDiscussionMessage(e.target.value)}
+            placeholder="Enter your message"
+            className="flex-grow-1"
+            style={{ marginRight: "8px" }}
+          />
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={handleSendGameMessage}
+            style={{ width: "max-content" }}
+          >
+            Send Message
+          </button>
+        </div>
       </Modal.Footer>
 
       <AddGameModal
