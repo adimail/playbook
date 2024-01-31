@@ -371,6 +371,8 @@ const MainComponent = () => {
   );
 };
 
+// ... (your other imports)
+
 const GameModal = ({
   setSelectedGame,
   selectedGame,
@@ -378,9 +380,9 @@ const GameModal = ({
   user,
 }) => {
   const [editing, setEditing] = useState(false);
-
   const [discussionMessage, setDiscussionMessage] = useState("");
   const [gameMessages, setGameMessages] = useState([]);
+  const [discussionOpen, setDiscussionOpen] = useState(false);
   const discussionRef = collection(db, `discussion-${selectedGame?.id}`);
 
   const handleSendGameMessage = async () => {
@@ -434,7 +436,13 @@ const GameModal = ({
   };
 
   const handleOpenDiscussion = () => {
+    setDiscussionOpen(true);
     setShowDiscussionModal(true);
+  };
+
+  const handleCloseDiscussion = () => {
+    setDiscussionOpen(false);
+    setShowDiscussionModal(false);
   };
 
   return (
@@ -442,74 +450,84 @@ const GameModal = ({
       show={selectedGame !== null}
       onHide={() => {
         setSelectedGame(null);
+        setDiscussionOpen(false);
       }}
       size="xl"
     >
       <Modal.Header closeButton>
-        <Modal.Title>{selectedGame?.name}</Modal.Title>
+        <Modal.Title>{discussionOpen ? `${selectedGame?.name} Discussion` : selectedGame?.name}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {selectedGame && selectedGame.description && (
-          <div style={{ fontSize: "small" }}>
-            <p className="description-modal">{selectedGame.description}</p>
-            <hr />
-            <ul>
-              {selectedGame.rules &&
-                selectedGame.rules.map((rule, index) => (
-                  <li key={index}>{rule}</li>
-                ))}
-            </ul>
+        {discussionOpen ? (
+          <div className="discussion-panel d-flex flex-column gap-3">
+            {gameMessages.map((msg) => (
+              <ChatMessage key={msg.id} message={msg} />
+            ))}
           </div>
+        ) : (
+          selectedGame && selectedGame.description && (
+            <div style={{ fontSize: "small" }}>
+              <p className="description-modal">{selectedGame.description}</p>
+              <hr />
+              <ul>
+                {selectedGame.rules &&
+                  selectedGame.rules.map((rule, index) => (
+                    <li key={index}>{rule}</li>
+                  ))}
+              </ul>
+            </div>
+          )
         )}
-        <div className="discussion-panel d-flex flex-column gap-3">
-          {gameMessages.map((msg) => (
-            <ChatMessage key={msg.id} message={msg} />
-          ))}
-        </div>
       </Modal.Body>
       <Modal.Footer
         className="d-flex gap-3"
         style={{ backgroundColor: "#d8d8d8" }}
       >
-        <div className="lable-container">
-          {selectedGame &&
-            selectedGame.labels &&
-            selectedGame.labels.map((label, index) => (
-              <div className="modal-game-label" key={index}>
-                {label}
-              </div>
-            ))}
-        </div>
-        <Button
-          variant="primary"
-          onClick={handleEdit}
-          style={{ width: "fit-content", padding: "3px 10px" }}
-        >
-          Edit Game
-        </Button>
-        <Button
-          variant="primary"
-          onClick={handleOpenDiscussion}
-          style={{ width: "fit-content", padding: "3px 10px" }}
-        >
-          Open Discussion
-        </Button>
-        <div className="d-flex justify-content-between w-100">
-          <input
-            value={discussionMessage}
-            onChange={(e) => setDiscussionMessage(e.target.value)}
-            placeholder="Enter your message"
-            className="flex-grow-1"
-            style={{ marginRight: "8px" }}
-          />
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={handleSendGameMessage}
-            style={{ width: "max-content" }}
+        {discussionOpen ? null : (
+          <div className="lable-container">
+            {selectedGame &&
+              selectedGame.labels &&
+              selectedGame.labels.map((label, index) => (
+                <div className="modal-game-label" key={index}>
+                  {label}
+                </div>
+              ))}
+          </div>
+        )}
+        {discussionOpen ? null : (
+          <Button
+            variant="primary"
+            onClick={handleEdit}
+            style={{ width: "fit-content", padding: "3px 10px" }}
           >
-            Send Message
-          </button>
-        </div>
+            Edit Game
+          </Button>
+        )}
+        <Button
+          variant="primary"
+          onClick={discussionOpen ? handleCloseDiscussion : handleOpenDiscussion}
+          style={{ width: "fit-content", padding: "3px 10px" }}
+        >
+          {discussionOpen ? 'Close Discussion' : 'Open Discussion'}
+        </Button>
+        {discussionOpen && (
+          <div className="d-flex justify-content-between w-100">
+            <input
+              value={discussionMessage}
+              onChange={(e) => setDiscussionMessage(e.target.value)}
+              placeholder="Enter your message"
+              className="flex-grow-1"
+              style={{ marginRight: "8px" }}
+            />
+            <button
+              className="btn btn-sm btn-primary"
+              onClick={handleSendGameMessage}
+              style={{ width: "max-content" }}
+            >
+              Send Message
+            </button>
+          </div>
+        )}
       </Modal.Footer>
 
       <AddGameModal
@@ -520,6 +538,9 @@ const GameModal = ({
     </Modal>
   );
 };
+
+// ... (rest of the code)
+
 
 const AddGameModal = ({ addingNewGame, setAddingNewGame, selectedGame }) => {
   const [gameName, setGameName] = useState(
