@@ -122,7 +122,7 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
       size="xl"
       dialogClassName="discussion-modal"
     >
-      <Modal.Header className="d-flex flex-column">
+      <Modal.Header className="d-flex flex-column" closeButton>
         <Modal.Title>Discussion Panel</Modal.Title>
         Follow community guidlines and be nice.
       </Modal.Header>
@@ -452,6 +452,10 @@ const AddGameModal = ({ addingNewGame, setAddingNewGame, selectedGame }) => {
     { value: "Outdoor Games", label: "Outdoor Games" },
     { value: "Mobile Games", label: "Mobile Games" },
     { value: "Arcade", label: "Arcade" },
+    { value: "Pen & Paper", label: "Pen & Paper" },
+    { value: "Party Game", label: "Party Game" },
+    { value: "Two Player", label: "Two Player" },
+    { value: "MultiPlayer", label: "MultiPlayer" },
   ];
 
   const handleLabelChange = (selectedOptions) => {
