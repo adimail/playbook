@@ -164,13 +164,13 @@ button:hover {
 
 .sent p {
   color: white;
-  background: #0b93f6;
+  background: #0082e0;
   align-self: flex-end;
   padding: 5px 10px;
   border-radius: 5px;
 }
 .received p {
-  background: #9393ff;
+  background: #89a7b6;
   color: black;
   padding: 5px 10px;
   border-radius: 5px;
@@ -203,9 +203,8 @@ button:hover {
   width: 500px;
   position: fixed;
   bottom: 0;
-  padding: 5px 100px;
+  padding: 5px 50px;
   border-radius: 3px;
-  margin: 10px;
   background: radial-gradient(circle, #131417, transparent);
   font-size: x-small;
 }
@@ -220,4 +219,11 @@ button:hover {
   padding: 10px;
   bottom: 0;
   right: 0;
+  z-index: inherit;
 }
+
+.err-msg {
+  justify-content: center;
+  height: 32vh;
+}
+

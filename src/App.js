@@ -73,27 +73,26 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
 
   const getMessages = () => {
     try {
-      const unsubscribe = onSnapshot(
-        query(messageRef, orderBy("createdAt", "asc"), limit(25)),
-        (querySnapshot) => {
-          const filteredData = querySnapshot.docs.map((doc) => ({
-            ...doc.data(),
-            id: doc.id,
-          }));
-          setMessages(filteredData);
-        },
-      );
-
-      return () => unsubscribe();
+      const q = query(messageRef, orderBy("createdAt", "asc"), limit(25));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const filteredData = snapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        setMessages(filteredData);
+      });
+  
+      return unsubscribe;
     } catch (err) {
       console.error(err);
     }
   };
-
+  
   useEffect(() => {
     const unsubscribe = getMessages();
     return () => unsubscribe();
   }, []);
+  
 
   const handleSendMessage = async () => {
     try {
@@ -122,11 +121,11 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
       size="xl"
       dialogClassName="discussion-modal"
     >
-      <Modal.Header className="d-flex flex-column">
+      <Modal.Header className="d-flex flex-column" closeButton>
         <Modal.Title>Discussion Panel</Modal.Title>
-        Follow community guidlines and be nice.
+        Follow community guidelines and be nice.
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body style={{ maxHeight: "68vh", overflowY: "auto" }}>
         <div className="discussion-panel d-flex flex-column gap-3">
           {messages &&
             messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
@@ -142,7 +141,7 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
             style={{ marginRight: "8px" }}
           />
           <button
-          className="btn btn-sm btn-primary"
+            className="btn btn-sm btn-primary"
             variant="primary"
             onClick={handleSendMessage}
             style={{ width: "max-content" }}
@@ -175,7 +174,6 @@ const Login = () => {
         <button className="button" onClick={signInWithGoogle}>
           Continue with Google <FaGoogle />
         </button>
-        Be nice 🤗
       </div>
       <div className="tweet">
         <span>Idea:</span>
@@ -200,6 +198,7 @@ const MainComponent = () => {
   const [selectedGame, setSelectedGame] = useState(null);
   const [addingNewGame, setAddingNewGame] = useState(false);
   const [showDiscussionPanel, setShowDiscussionPanel] = useState(false);
+  const [showDiscussionModal, setShowDiscussionModal] = useState(false);
 
   const toggleDiscussionPanel = () =>
     setShowDiscussionPanel(!showDiscussionPanel);
@@ -246,7 +245,10 @@ const MainComponent = () => {
             {user && <img src={user.photoURL} alt="Profile" />}
           </OverlayTrigger>
           <div className="git-icon">
-            <a style={{color:"white"}} href="https://github.com/adimail/playbook">
+            <a
+              style={{ color: "white" }}
+              href="https://github.com/adimail/playbook"
+            >
               <FaGithub />
             </a>
           </div>
@@ -341,11 +343,15 @@ const MainComponent = () => {
           <GameModal
             setSelectedGame={setSelectedGame}
             selectedGame={selectedGame}
+            user={user}
+            showDiscussionModal={showDiscussionModal}
+            setShowDiscussionModal={setShowDiscussionModal}
           />
 
           <AddGameModal
             addingNewGame={addingNewGame}
             setAddingNewGame={setAddingNewGame}
+            user={user}
           />
 
           <DiscussionPanel
@@ -363,56 +369,172 @@ const MainComponent = () => {
   );
 };
 
-const GameModal = ({ setSelectedGame, selectedGame }) => {
+const GameModal = ({
+  setSelectedGame,
+  selectedGame,
+  setShowDiscussionModal,
+  user,
+}) => {
   const [editing, setEditing] = useState(false);
+  const [discussionMessage, setDiscussionMessage] = useState("");
+  const [gameMessages, setGameMessages] = useState([]);
+  const [discussionOpen, setDiscussionOpen] = useState(false);
+  const discussionRef = collection(db, `discussion-${selectedGame?.id}`);
+
+  const handleSendGameMessage = async () => {
+    try {
+      if (discussionMessage.trim() === "") {
+        return;
+      }
+      const newMessage = {
+        createdAt: new Date(),
+        photoURL: user.photoURL,
+        text: discussionMessage,
+        uid: user.uid,
+      };
+
+      await addDoc(discussionRef, newMessage);
+
+      setDiscussionMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  const getGameMessages = () => {
+    try {
+      const unsubscribe = onSnapshot(
+        query(discussionRef, orderBy("createdAt", "asc"), limit(25)),
+        (querySnapshot) => {
+          const filteredData = querySnapshot.docs.map((doc) => ({
+            ...doc.data(),
+            id: doc.id,
+          }));
+          setGameMessages(filteredData);
+        },
+      );
+
+      return () => unsubscribe();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedGame !== null && selectedGame) {
+      const unsubscribe = getGameMessages();
+      return () => unsubscribe();
+    }
+  }, [selectedGame !== null, selectedGame]);
 
   const handleEdit = () => {
     setEditing(true);
   };
 
+  const handleOpenDiscussion = () => {
+    setDiscussionOpen(true);
+    setShowDiscussionModal(true);
+  };
+
   return (
     <Modal
       show={selectedGame !== null}
-      onHide={() => setSelectedGame(null)}
+      onHide={() => {
+        setSelectedGame(null);
+        setDiscussionOpen(false);
+      }}
       size="xl"
     >
       <Modal.Header closeButton>
-        <Modal.Title>{selectedGame?.name}</Modal.Title>
+        <Modal.Title>
+          {discussionOpen
+            ? `${selectedGame?.name} Discussion`
+            : selectedGame?.name}
+        </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        {selectedGame && selectedGame.description && (
-          <div style={{ fontSize: "small" }}>
-            <p className="description-modal">{selectedGame.description}</p>
-            <hr />
-            <ul>
-              {selectedGame.rules &&
-                selectedGame.rules.map((rule, index) => (
-                  <li key={index}>{rule}</li>
+      <Modal.Body style={{ maxHeight: "68vh", overflowY: "auto" }}>
+        {discussionOpen ? (
+          <>
+            {gameMessages.length > 0 ? (
+              <div className="discussion-panel d-flex flex-column gap-3">
+                {gameMessages.map((msg) => (
+                  <ChatMessage key={msg.id} message={msg} />
                 ))}
-            </ul>
-          </div>
+              </div>
+            ) : (
+              <div className="err-msg d-flex flex-column align-items-center">
+                <h3>No messages yet.</h3> Start a discussion!
+              </div>
+            )}
+          </>
+        ) : (
+          selectedGame &&
+          selectedGame.description && (
+            <div style={{ fontSize: "small" }}>
+              <p className="description-modal">{selectedGame.description}</p>
+              <hr />
+              <ul>
+                {selectedGame.rules &&
+                  selectedGame.rules.map((rule, index) => (
+                    <li key={index}>{rule}</li>
+                  ))}
+              </ul>
+            </div>
+          )
+        )}
+        {!discussionOpen && (
+          <Button
+            variant="primary"
+            onClick={handleOpenDiscussion}
+            style={{ width: "fit-content", padding: "3px 10px" }}
+          >
+            Open Discussion
+          </Button>
         )}
       </Modal.Body>
       <Modal.Footer
         className="d-flex gap-3"
         style={{ backgroundColor: "#d8d8d8" }}
       >
-        <div className="lable-container">
-          {selectedGame &&
-            selectedGame.labels &&
-            selectedGame.labels.map((label, index) => (
-              <div className="modal-game-label" key={index}>
-                {label}
-              </div>
-            ))}
-        </div>
-        <Button
-          variant="primary"
-          onClick={handleEdit}
-          style={{ width: "fit-content", padding: "3px 10px" }}
-        >
-          Edit Game
-        </Button>
+        {discussionOpen ? null : (
+          <div className="lable-container">
+            {selectedGame &&
+              selectedGame.labels &&
+              selectedGame.labels.map((label, index) => (
+                <div className="modal-game-label" key={index}>
+                  {label}
+                </div>
+              ))}
+          </div>
+        )}
+        {discussionOpen ? null : (
+          <Button
+            variant="primary"
+            onClick={handleEdit}
+            style={{ width: "fit-content", padding: "3px 10px" }}
+          >
+            Edit Game
+          </Button>
+        )}
+
+        {discussionOpen && (
+          <div className="d-flex justify-content-between w-100">
+            <input
+              value={discussionMessage}
+              onChange={(e) => setDiscussionMessage(e.target.value)}
+              placeholder="Enter your message"
+              className="flex-grow-1"
+              style={{ marginRight: "8px" }}
+            />
+            <button
+              className="btn btn-sm btn-primary"
+              onClick={handleSendGameMessage}
+              style={{ width: "max-content" }}
+            >
+              Send Message
+            </button>
+          </div>
+        )}
       </Modal.Footer>
 
       <AddGameModal
@@ -452,6 +574,10 @@ const AddGameModal = ({ addingNewGame, setAddingNewGame, selectedGame }) => {
     { value: "Outdoor Games", label: "Outdoor Games" },
     { value: "Mobile Games", label: "Mobile Games" },
     { value: "Arcade", label: "Arcade" },
+    { value: "Pen & Paper", label: "Pen & Paper" },
+    { value: "Party Game", label: "Party Game" },
+    { value: "Two Player", label: "Two Player" },
+    { value: "MultiPlayer", label: "MultiPlayer" },
   ];
 
   const handleLabelChange = (selectedOptions) => {

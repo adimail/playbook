@@ -13,6 +13,7 @@ Live application [here](https://playbook-e0207.web.app/)
 - **User Authentication**: Users can sign in using their Google account.
 - **Game Archive**: Store and explore games from childhood, including their names, descriptions, labels, and rules.
 - **Discussion Panel**: Engage in discussions with the community through a real-time discussion panel.
+- **Discussion Panel for each game**: We have an seperate discussion panel for each game.
 
 ## screenshots
 
@@ -21,6 +22,7 @@ Live application [here](https://playbook-e0207.web.app/)
 ![discussions](assets/discussions.png)
 ![addgame](assets/addgame.png)
 ![game](assets/game.png)
+![game](assets/gamediscussion.png)
 
 ## Run locally
 
