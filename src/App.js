@@ -4,9 +4,9 @@ import Select from "react-select";
 import { Tweet } from "react-tweet";
 import { ImBin } from "react-icons/im";
 import { MdError } from "react-icons/md";
-import { FaGoogle } from "react-icons/fa";
 import { BiSolidGame } from "react-icons/bi";
 import React, { useState, useEffect } from "react";
+import { FaGoogle, FaGithub } from "react-icons/fa";
 import { Modal, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { HiMiniArrowSmallDown, HiMiniArrowSmallUp } from "react-icons/hi2";
 
@@ -141,13 +141,14 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
             className="flex-grow-1"
             style={{ marginRight: "8px" }}
           />
-          <Button
+          <button
+          className="btn btn-sm btn-primary"
             variant="primary"
             onClick={handleSendMessage}
             style={{ width: "max-content" }}
           >
             Send Message
-          </Button>
+          </button>
         </div>
       </Modal.Footer>
     </Modal>
@@ -244,6 +245,11 @@ const MainComponent = () => {
           >
             {user && <img src={user.photoURL} alt="Profile" />}
           </OverlayTrigger>
+          <div className="git-icon">
+            <a style={{color:"white"}} href="https://github.com/adimail/playbook">
+              <FaGithub />
+            </a>
+          </div>
         </div>
         <div className="main container">
           <div className="text-center">
@@ -255,8 +261,8 @@ const MainComponent = () => {
               overlay={renderTooltip("Click to add a new game")}
             >
               <button
-                style={{ fontSize: "13px", maxWidth: "200px" }}
-                className="pagebuttons btn btn-success mb-4"
+                style={{ fontSize: "13px", maxWidth: "180px" }}
+                className="pagebuttons btn btn-sm btn-success mb-4"
                 onClick={() => setAddingNewGame(true)}
               >
                 Add Game 🎲
@@ -268,8 +274,8 @@ const MainComponent = () => {
               overlay={renderTooltip("Chat with community")}
             >
               <button
-                style={{ fontSize: "13px", maxWidth: "200px" }}
-                className="pagebuttons btn btn-secondary mb-4"
+                style={{ fontSize: "13px", maxWidth: "180px" }}
+                className="pagebuttons btn btn-sm btn-secondary mb-4"
                 onClick={() => toggleDiscussionPanel()}
               >
                 Discussions 💭
@@ -281,8 +287,8 @@ const MainComponent = () => {
               overlay={renderTooltip("Click to log out")}
             >
               <button
-                style={{ fontSize: "13px", maxWidth: "200px" }}
-                className="pagebuttons btn btn-danger mb-4"
+                style={{ fontSize: "13px", maxWidth: "180px" }}
+                className="pagebuttons btn btn-sm btn-danger mb-4"
                 onClick={logout}
               >
                 Log out 👋
