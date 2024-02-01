@@ -3,10 +3,13 @@ import "./App.css";
 import Select from "react-select";
 import { Tweet } from "react-tweet";
 import { ImBin } from "react-icons/im";
+import { IoSend } from "react-icons/io5";
 import { MdError } from "react-icons/md";
 import { BiSolidGame } from "react-icons/bi";
 import React, { useState, useEffect } from "react";
 import { FaGoogle, FaGithub } from "react-icons/fa";
+import { IoChevronBackCircle } from "react-icons/io5";
+import { GoStarFill, GoStar } from "react-icons/go";
 import { Modal, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { HiMiniArrowSmallDown, HiMiniArrowSmallUp } from "react-icons/hi2";
 
@@ -23,7 +26,24 @@ import {
   doc,
   orderBy,
   onSnapshot,
+  updateDoc,
+  increment,
+  setDoc,
+  getDoc,
 } from "firebase/firestore";
+
+// Debounce function
+const debounce = (func, delay) => {
+  let timeoutId;
+  return function (...args) {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+};
 
 // App entrypoint
 function App() {
@@ -81,20 +101,19 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
         }));
         setMessages(filteredData);
       });
-  
+
       return unsubscribe;
     } catch (err) {
       console.error(err);
     }
   };
-  
+
   useEffect(() => {
     const unsubscribe = getMessages();
     return () => unsubscribe();
   }, []);
-  
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = debounce(async () => {
     try {
       if (discussionMessage.trim() === "") {
         return;
@@ -105,14 +124,14 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
         text: discussionMessage,
         uid: user.uid,
       };
-
+  
       await addDoc(collection(db, "discussion"), newMessage);
-
+  
       setDiscussionMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
     }
-  };
+  }, 300);
 
   return (
     <Modal
@@ -146,7 +165,7 @@ const DiscussionPanel = ({ show, handleClose, user }) => {
             onClick={handleSendMessage}
             style={{ width: "max-content" }}
           >
-            Send Message
+            <IoSend />
           </button>
         </div>
       </Modal.Footer>
@@ -199,6 +218,7 @@ const MainComponent = () => {
   const [addingNewGame, setAddingNewGame] = useState(false);
   const [showDiscussionPanel, setShowDiscussionPanel] = useState(false);
   const [showDiscussionModal, setShowDiscussionModal] = useState(false);
+  const [userStarredGames, setUserStarredGames] = useState([]);
 
   const toggleDiscussionPanel = () =>
     setShowDiscussionPanel(!showDiscussionPanel);
@@ -210,6 +230,50 @@ const MainComponent = () => {
     setSelectedGame(game);
   };
 
+  const starGame = async (gameId) => {
+    try {
+      const gameRef = doc(db, "games", gameId);
+
+      const gameSnapshot = await getDoc(gameRef);
+      const currentStars = gameSnapshot.data().stars || 0;
+
+      if (userStarredGames.includes(gameId)) {
+        await updateDoc(gameRef, {
+          stars: currentStars > 0 ? increment(-1) : 0,
+        });
+
+        const starredGameDoc = doc(
+          collection(db, "users", user.uid, "starredGames"),
+          gameId,
+        );
+        await deleteDoc(starredGameDoc);
+
+        setUserStarredGames((prevStarredGames) =>
+          prevStarredGames.filter((id) => id !== gameId),
+        );
+      } else {
+        await updateDoc(gameRef, {
+          stars: increment(1),
+        });
+
+        const starredGamesRef = collection(
+          db,
+          "users",
+          user.uid,
+          "starredGames",
+        );
+        await setDoc(doc(starredGamesRef, gameId), { starred: true });
+
+        setUserStarredGames((prevStarredGames) => [
+          ...prevStarredGames,
+          gameId,
+        ]);
+      }
+    } catch (error) {
+      console.error("Error starring game:", error);
+    }
+  };
+
   const getGameList = () => {
     try {
       const q = query(gamesCollectionRef, limit(10));
@@ -218,6 +282,7 @@ const MainComponent = () => {
         const updatedData = querySnapshot.docs.map((doc) => ({
           ...doc.data(),
           id: doc.id,
+          stars: doc.data().stars || 0,
         }));
         setGameList(updatedData);
       });
@@ -231,12 +296,21 @@ const MainComponent = () => {
   useEffect(() => {
     const unsubscribeFromSnapshot = getGameList();
 
-    return () => unsubscribeFromSnapshot();
-  }, []);
+    const starredGamesRef = collection(db, "users", user.uid, "starredGames");
+    const unsubscribeStarred = onSnapshot(starredGamesRef, (snapshot) => {
+      const starredGames = snapshot.docs.map((doc) => doc.id);
+      setUserStarredGames(starredGames);
+    });
+
+    return () => {
+      unsubscribeFromSnapshot();
+      unsubscribeStarred();
+    };
+  }, [user]);
 
   return (
     <>
-      <div className="d-flex w-100">
+      <div className="d-flex w-100 flex-column">
         <div className="userimage">
           <OverlayTrigger
             placement="bottom"
@@ -255,7 +329,7 @@ const MainComponent = () => {
         </div>
         <div className="main container">
           <div className="text-center">
-            <h1 className="mt-5 mb-4">Play Book</h1>
+            <h1 className="mb-3">Play Book</h1>
           </div>
           <div className="d-flex gap-3 w-100 justify-content-around">
             <OverlayTrigger
@@ -304,23 +378,37 @@ const MainComponent = () => {
                 <div key={game.id} className="game col-md-12 mb-4">
                   <div
                     className="card d-flex flex-column h-100"
-                    onClick={() => openModal(game)}
                     style={{
-                      cursor: "pointer",
+                      
                       backgroundColor: "#13263d",
                       border: "0.5px solid #ffffff69",
                       color: "white",
                     }}
                   >
                     <div className="card-body flex-grow-1">
-                      <h5 className="card-title">{game.name}</h5>
-                      <p className="description">{game.description}</p>
-                      <div className="lable-container">
-                        {game.labels.map((label, index) => (
-                          <div className="game-label" key={index}>
-                            {label}
-                          </div>
-                        ))}
+                      <h5 className="card-title d-flex justify-content-between w-100">
+                        <div>{game.name}</div>
+                        <small
+                          className="d-flex align-items-center gap-1"
+                          onClick={() => starGame(game.id)}
+                        >
+                          {userStarredGames.includes(game.id) ? (
+                            <GoStarFill style={{ color: "gold" }} />
+                          ) : (
+                            <GoStar style={{ color: "gold" }} />
+                          )}{" "}
+                          {game.stars}
+                        </small>
+                      </h5>
+                      <div onClick={() => openModal(game)} style={{cursor: "pointer"}}>
+                        <p className="description">{game.description}</p>
+                        <div className="lable-container">
+                          {game.labels.map((label, index) => (
+                            <div className="game-label" key={index}>
+                              {label}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -363,7 +451,7 @@ const MainComponent = () => {
       </div>
       <footer className="footer">
         Made with love by{" "}
-        <a href="https://twitter.com/adityagodse381">Aditya Godse</a>
+        <a href="https://twitter.com/adityagodse381"> Aditya Godse</a>
       </footer>
     </>
   );
@@ -436,6 +524,11 @@ const GameModal = ({
     setShowDiscussionModal(true);
   };
 
+  const handleCloseDiscussion = () => {
+    setDiscussionOpen(false);
+    setShowDiscussionModal(false);
+  };
+
   return (
     <Modal
       show={selectedGame !== null}
@@ -447,9 +540,21 @@ const GameModal = ({
     >
       <Modal.Header closeButton>
         <Modal.Title>
-          {discussionOpen
-            ? `${selectedGame?.name} Discussion`
-            : selectedGame?.name}
+          {discussionOpen ? (
+            <div className="d-flex align-items-center gap-3">
+              <IoChevronBackCircle
+                style={{
+                  marginRight: "10px",
+                  cursor: "pointer",
+                  color: "black",
+                }}
+                onClick={handleCloseDiscussion}
+              />
+              {selectedGame?.name} Discussion
+            </div>
+          ) : (
+            selectedGame?.name
+          )}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body style={{ maxHeight: "68vh", overflowY: "auto" }}>
@@ -531,7 +636,7 @@ const GameModal = ({
               onClick={handleSendGameMessage}
               style={{ width: "max-content" }}
             >
-              Send Message
+              <IoSend />
             </button>
           </div>
         )}
