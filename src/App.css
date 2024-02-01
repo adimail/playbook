@@ -21,7 +21,7 @@ button {
   cursor: pointer;
   transition: 0.15s ease-in;
 }
-  
+
 button:hover {
   border-radius: 5px;
 }
@@ -61,8 +61,15 @@ button:hover {
   transform: scale(1.05);
 }
 
+.lable-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .game-label{
   font-size: small;
+  width: fit-content;
   border: 1px solid green;
   padding: 3px 10px;
   border-radius: 5px;
@@ -78,10 +85,6 @@ button:hover {
   color: #000;
 }
 
-.lable-container {
-  display: flex;
-  gap: 10px;
-}
 
 .description{
   font-size: 10px;
@@ -134,7 +137,6 @@ button:hover {
 
 
 .userimage{
-  position: fixed;
   display: flex;
   flex-direction: column;
   justify-content: right;
@@ -149,14 +151,11 @@ button:hover {
   max-width: 200px;
 }
 
-/*  */
-
 .message {
   display: flex;
   align-items: center;
 
 }
-
 
 .sent {
   flex-direction: row-reverse;
@@ -226,4 +225,3 @@ button:hover {
   justify-content: center;
   height: 32vh;
 }
-
