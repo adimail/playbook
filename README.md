@@ -14,7 +14,7 @@ Live application [here](https://playbook-e0207.web.app/)
 - **Game Archive**: Store and explore games from childhood, including their names, descriptions, labels, and rules.
 - **Discussion Panel**: Engage in discussions with the community through a real-time discussion panel.
 - **Discussion Panel for each game**: We have an seperate discussion panel for each game.
-- **Star games ⭐**: Users can star the games they like as an endorsements.
+- **Star games**: Users can star the games they like as an endorsements.
 - **Stickers**: Send stickers in chat messages.
 
 ## screenshots
