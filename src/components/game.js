@@ -27,7 +27,6 @@ function ChatMessage(props) {
     props.message;
 
   const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
-
   const formattedDate = new Date(createdAt.toDate());
   const dateString = formattedDate.toLocaleString();
 
@@ -92,7 +91,7 @@ export const GameModal = ({
     try {
       await addDoc(
         collection(db, `discussion-${selectedGame?.id}`),
-        stickerMessage,
+        stickerMessage
       );
     } catch (error) {
       console.error("Error sending sticker message:", error);
@@ -129,7 +128,7 @@ export const GameModal = ({
             id: doc.id,
           }));
           setGameMessages(filteredData);
-        },
+        }
       );
 
       return () => unsubscribe();
@@ -324,15 +323,15 @@ export const AddGameModal = ({
   selectedGame,
 }) => {
   const [gameName, setGameName] = useState(
-    selectedGame ? selectedGame.name : "",
+    selectedGame ? selectedGame.name : ""
   );
   const [gameDescription, setGameDescription] = useState(
-    selectedGame ? selectedGame.description : "",
+    selectedGame ? selectedGame.description : ""
   );
   const [selectedLabels, setSelectedLabels] = useState(
     selectedGame
       ? selectedGame.labels.map((label) => ({ value: label, label }))
-      : [],
+      : []
   );
   const [rules, setRules] = useState(
     selectedGame
@@ -341,7 +340,7 @@ export const AddGameModal = ({
           value: rule,
           collapsed: false,
         }))
-      : [{ id: 1, value: "", collapsed: false }],
+      : [{ id: 1, value: "", collapsed: false }]
   );
 
   const labelOptions = [
@@ -366,21 +365,25 @@ export const AddGameModal = ({
       rules.length > 0 && !rules.some((rule) => rule.value.trim() === "");
 
     if (isValidToAdd) {
-      const newRule = { id: rules.length + 1, value: "", collapsed: false };
+      const newRule = {
+        id: rules.length + 1,
+        value: "",
+        collapsed: false,
+      };
       setRules([...rules, newRule]);
     }
   };
 
   const handleRuleChange = (id, value) => {
     const newRules = rules.map((rule) =>
-      rule.id === id ? { ...rule, value } : rule,
+      rule.id === id ? { ...rule, value } : rule
     );
     setRules(newRules);
   };
 
   const handleToggleCollapse = (id) => {
     const newRules = rules.map((rule) =>
-      rule.id === id ? { ...rule, collapsed: !rule.collapsed } : rule,
+      rule.id === id ? { ...rule, collapsed: !rule.collapsed } : rule
     );
     setRules(newRules);
   };
@@ -405,6 +408,7 @@ export const AddGameModal = ({
         description: gameDescription,
         labels: selectedLabels.map((label) => label.value),
         rules: rules.map((rule) => rule.value),
+        stars: 0,
       };
 
       if (selectedGame) {
@@ -503,13 +507,17 @@ export const AddGameModal = ({
                         {rule.collapsed ? (
                           <HiMiniArrowSmallDown
                             className="collapsible-button"
-                            style={{ fontSize: "24px" }}
+                            style={{
+                              fontSize: "24px",
+                            }}
                             onClick={() => handleToggleCollapse(rule.id)}
                           />
                         ) : (
                           <HiMiniArrowSmallUp
                             className="collapsible-button"
-                            style={{ fontSize: "24px" }}
+                            style={{
+                              fontSize: "24px",
+                            }}
                             onClick={() => handleToggleCollapse(rule.id)}
                           />
                         )}

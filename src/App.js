@@ -23,6 +23,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 
+// app modules
 import { Login, logout } from "./config/user";
 import { GameModal, AddGameModal } from "./components/game";
 import { DiscussionPanel } from "./components/discussion";
@@ -53,7 +54,7 @@ const MainComponent = () => {
 
   const toggleDiscussionPanel = () =>
     setShowDiscussionPanel(!showDiscussionPanel);
-    
+
   const gamesCollectionRef = collection(db, "games");
 
   const renderTooltip = (text) => <Tooltip>{text}</Tooltip>;
@@ -76,12 +77,12 @@ const MainComponent = () => {
 
         const starredGameDoc = doc(
           collection(db, "users", user.uid, "starredGames"),
-          gameId,
+          gameId
         );
         await deleteDoc(starredGameDoc);
 
         setUserStarredGames((prevStarredGames) =>
-          prevStarredGames.filter((id) => id !== gameId),
+          prevStarredGames.filter((id) => id !== gameId)
         );
       } else {
         await updateDoc(gameRef, {
@@ -92,7 +93,7 @@ const MainComponent = () => {
           db,
           "users",
           user.uid,
-          "starredGames",
+          "starredGames"
         );
         await setDoc(doc(starredGamesRef, gameId), { starred: true });
 
@@ -108,7 +109,7 @@ const MainComponent = () => {
 
   const getGameList = () => {
     try {
-      const q = query(gamesCollectionRef, orderBy("stars", "desc"), limit(30));
+      const q = query(gamesCollectionRef, limit(30));
 
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const updatedData = querySnapshot.docs.map((doc) => ({
@@ -224,9 +225,17 @@ const MainComponent = () => {
                           onClick={() => starGame(game.id)}
                         >
                           {userStarredGames.includes(game.id) ? (
-                            <GoStarFill style={{ color: "gold" }} />
+                            <GoStarFill
+                              style={{
+                                color: "gold",
+                              }}
+                            />
                           ) : (
-                            <GoStar style={{ color: "gold" }} />
+                            <GoStar
+                              style={{
+                                color: "gold",
+                              }}
+                            />
                           )}{" "}
                           {game.stars}
                         </small>
